@@ -1,5 +1,6 @@
 import { Viewer, type ViewerConfig } from '@photo-sphere-viewer/core';
 import '@photo-sphere-viewer/core/index.css';
+import '@photo-sphere-viewer/markers-plugin/index.css'
 
 export default class SphereViewer {
 
@@ -9,16 +10,17 @@ export default class SphereViewer {
     this.initViewer(options)
   }
 
-  private initViewer (options: ViewerConfig) {
+  private initViewer ({fisheye = true, ...rest}: ViewerConfig) {
+
     this.viewer = new Viewer({
-      fisheye: true,
-      ...options
+      fisheye,
+      ...rest
     });
   };
 
   get getIns(): Viewer {
     return this.viewer as Viewer
-  }
+  };
 
   // 销毁全景查看器
   public destroy() {

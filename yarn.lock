@@ -285,6 +285,11 @@
   dependencies:
     three "^0.167.0"
 
+"@photo-sphere-viewer/markers-plugin@^5.10.0":
+  version "5.10.0"
+  resolved "https://mirrors.cloud.tencent.com/npm/@photo-sphere-viewer/markers-plugin/-/markers-plugin-5.10.0.tgz#d2e75fa650f8dcdc4047211e7636e3b14815b80f"
+  integrity sha512-e8QamRuuYpphbh+KbWoxj/kqbQyNG7mU55OGCrOVdv74T/68EZQrLEfNkzmHJ0/pwtzDiZ0tx1Wr58nJWZWi9w==
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://mirrors.cloud.tencent.com/npm/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
@@ -1699,6 +1704,11 @@ queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://mirrors.cloud.tencent.com/npm/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
+
+radash@^12.1.0:
+  version "12.1.0"
+  resolved "https://mirrors.cloud.tencent.com/npm/radash/-/radash-12.1.0.tgz#a15a5d745bfe3c3a6428148a606000aefd238560"
+  integrity sha512-b0Zcf09AhqKS83btmUeYBS8tFK7XL2e3RvLmZcm0sTdF1/UUlHSsjXdCcWNxe7yfmAlPve5ym0DmKGtTzP6kVQ==
 
 react-dom@^18.3.1:
   version "18.3.1"

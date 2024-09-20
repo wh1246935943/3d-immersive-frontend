@@ -5,3 +5,27 @@
 .psv-loader {
   display: none !important;
 }
+
+.switch-perspective-marker {
+  width: 24px;
+  height: 6px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(10px);
+  cursor: pointer;
+}
+
+.switch-perspective-marker::before {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 40px;
+  height: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+}
