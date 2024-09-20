@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import './style.less';
 
-const imgList = [
+const testDataList = [
   {
     id: '1',
     url: new URL(`@/assets/1.jpg`, import.meta.url).href,
@@ -34,34 +34,46 @@ interface CameraPos {
 interface ImageListItem {
   id: string;
   url: string;
+  active?: boolean;
   cameraPos: CameraPos[]
 };
 
 type MouseInteractionType = 'EDIT_CAMERA_POS' | 'BROWSE_PANORAMA';
 
-// let viewerClickForEditCaneraPos;
+type States = {
+  panoramaList: ImageListItem[];
+  mouseInteractionType: MouseInteractionType;
+};
 
 function SphereViewerBox() {
 
+  const defaultStates: States = {
+    panoramaList: testDataList,
+    mouseInteractionType: 'BROWSE_PANORAMA',
+  }
+
+  const stateRef = useRef<States>(defaultStates);
   const sphereViewerRef = useRef<SphereViewer | null>(null);
   const viewerInsRef = useRef<Viewer | null>(null);
   const autorotateRef = useRef<AutorotatePlugin | null>(null);
   const markersPlugin = useRef<MarkersPlugin | null>(null);
 
-  const [ imageList, setImageList ] = useState<ImageListItem[]>(imgList);
-  const [ imageId, setImageId ] = useState('');
-  const [ mouseInteractionType, setMouseInteractionType ] = useState<MouseInteractionType>('BROWSE_PANORAMA');
+  const [ states, setStates ] = useState(defaultStates);
 
-
-  const getImageInfoById = (id: string) => {
-    return imageList.find(item => item.id === id)
+  const getPanoramaInfo = (id?: string) => {
+    if (typeof id ==='string') {
+      return states.panoramaList.find(item => item.id === id)
+    }
+    return states.panoramaList.find(item => item.active)
   };
 
   useEffect(() => {
+    stateRef.current = {...states}
+  }, [states])
 
+  useEffect(() => {
     sphereViewerRef.current = new SphereViewer({
       container: '#viewerContainer',
-      // panorama: imageList[imageIndex].url,
       defaultZoomLvl: 30,
       navbar: false,
       plugins: [
@@ -71,7 +83,7 @@ function SphereViewerBox() {
           autorotatePitch: 0,
         }],
         [ MarkersPlugin, {
-          clickEventOnMarker: true,
+          clickEventOnMarker: false,
           markers: [],
         }]
       ],
@@ -79,9 +91,7 @@ function SphereViewerBox() {
 
     viewerInsRef.current = sphereViewerRef.current.getIns;
   
-    switchPanorama(imageList[1]);
-
-    viewerInsRef.current.addEventListener('ready', viewerReady);
+    switchPanorama(states.panoramaList[1]);
 
     autorotateRef.current = viewerInsRef.current?.getPlugin<AutorotatePlugin>(AutorotatePlugin);
 
@@ -90,14 +100,14 @@ function SphereViewerBox() {
     markersPlugin.current?.addEventListener('select-marker', (e) => {
 
       // 点击相机位置标记，切换全景图
-      if (mouseInteractionType === 'BROWSE_PANORAMA') switchPanorama(getImageInfoById(e.marker.id));
+      if (stateRef.current.mouseInteractionType === 'BROWSE_PANORAMA') switchPanorama(e.marker.id);
 
       // 删除当前点击的相机位置标记
-      if (mouseInteractionType === 'EDIT_CAMERA_POS') {
+      if (stateRef.current.mouseInteractionType === 'EDIT_CAMERA_POS') {
 
         markersPlugin.current?.removeMarker(e.marker.id);
 
-        const item = getImageInfoById(e.marker.id);
+        const item = getPanoramaInfo();
 
         if (!item) return;
 
@@ -105,31 +115,31 @@ function SphereViewerBox() {
 
         if (index!== -1) item.cameraPos.splice(index, 1);
 
-        setImageList([...imageList]);
+        // setStates({...states});
 
       }
 
     });
 
     return () => {
+
       sphereViewerRef.current?.destroy();
+
     }
 
   }, []);
-
-  const viewerReady = () => {
-    // ...
-  };
   
   const setAutorotate = () => {
+
     autorotateRef.current?.toggle();
+
   };
 
   const handleEditCameraPos = () => {
 
-    if (mouseInteractionType === 'EDIT_CAMERA_POS') {
+    if (states.mouseInteractionType === 'EDIT_CAMERA_POS') {
 
-      setMouseInteractionType('BROWSE_PANORAMA');
+      setStates({...states, mouseInteractionType: 'BROWSE_PANORAMA'})
 
       viewerInsRef.current?.removeEventListener('click', viewerClickForEditCaneraPos.current);
 
@@ -137,31 +147,28 @@ function SphereViewerBox() {
 
     };
 
-    setMouseInteractionType(() => {
+    states.mouseInteractionType = 'EDIT_CAMERA_POS';
+    setStates({...states});
 
-      viewerInsRef.current?.addEventListener('click', viewerClickForEditCaneraPos.current);
-      
-      return 'EDIT_CAMERA_POS';
-    });
-
+    viewerInsRef.current?.addEventListener('click', viewerClickForEditCaneraPos.current);
 
   }
 
   const viewerClickForEditCaneraPos = useRef((e) => {
     
-    if (mouseInteractionType !== 'EDIT_CAMERA_POS') return;
+    if (stateRef.current.mouseInteractionType !== 'EDIT_CAMERA_POS') return;
 
-    const item = getImageInfoById(imageId);
+    const item = getPanoramaInfo();
 
     if (!item) return;
 
     const { pitch, yaw } = e.data;
 
-    const id = `${imageId}_${pitch}_${yaw}`;
+    const id = `${item.id}_${pitch}_${yaw}`;
 
     item.cameraPos.push({ id, pitch, yaw });
 
-    setImageList([...imageList]);
+    // setStates({...states});
 
     // 向页面添加相机位置标记
     markersPlugin.current?.addMarker({
@@ -172,41 +179,23 @@ function SphereViewerBox() {
     });
   });
 
-  
-  // 相机位置编辑状态下，点击全景图，添加相机位置标记
-  // viewerClickForEditCaneraPos.current = (e) => {
-  //   debugger
-
-  //   if (mouseInteractionType !== 'EDIT_CAMERA_POS') return;
-
-  //   const item = getImageInfoById(imageId);
-
-  //   if (!item) return;
-
-  //   const { pitch, yaw } = e.data;
-
-  //   const id = `${imageId}_${pitch}_${yaw}`;
-
-  //   item.cameraPos.push({ id, pitch, yaw });
-
-  //   setImageList([...imageList]);
-
-  //   // 向页面添加相机位置标记
-  //   markersPlugin.current?.addMarker({
-  //     id,
-  //     position: { pitch, yaw },
-  //     html: '<div class="switch-perspective-marker"></div>',
-  //     scale: [1, 1.5]
-  //   });
-  // };
-
-  const switchPanorama = (item: ImageListItem | undefined) => {
+  const switchPanorama = (item: ImageListItem | string | undefined) => {
 
     if (!item) return;
 
+    if (typeof item ==='string') {
+
+      item = states.panoramaList.find((imgInfo) => imgInfo.id === item);
+
+      if (!item) return;
+
+    };
+
     viewerInsRef.current?.setPanorama(item.url);
 
-    setImageId(item.id)
+    states.panoramaList.forEach((imgInfo) => (imgInfo.active = imgInfo.id === item.id));
+
+    setStates({...states});
 
   }
 
@@ -216,17 +205,17 @@ function SphereViewerBox() {
       <div className="options absolute bottom-5 left-5 flex flex-col">
         <div className="">
           <button className="bg-blue-500 text-slate-50 mr-3 p-2" onClick={setAutorotate}>停止/开始旋转</button>
-          <button className="bg-blue-500 text-slate-50 mr-3 p-2" onClick={handleEditCameraPos}>{mouseInteractionType === 'EDIT_CAMERA_POS' ? '退出编辑相机位置' : '编辑相机位置'}</button>
+          <button className="bg-blue-500 text-slate-50 mr-3 p-2" onClick={handleEditCameraPos}>{states.mouseInteractionType === 'EDIT_CAMERA_POS' ? '退出编辑相机位置' : '编辑相机位置'}</button>
         </div>
         <div className="flex mr-3 mt-3">
           {
-            imageList.map((item) => {
+            states.panoramaList.map((item) => {
               return (
                 <img
                   key={item.id}
                   onClick={switchPanorama.bind(null, item)}
                   src={item.url}
-                  className={`w-20 h-10 mr-3 cursor-pointer ${imageId === item.id ? 'border-2 border-green-700' : ''}`}
+                  className={`w-20 h-10 mr-3 cursor-pointer ${item.active ? 'border-2 border-green-700' : ''}`}
                 />
               )
             })
