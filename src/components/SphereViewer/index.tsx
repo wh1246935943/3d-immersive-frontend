@@ -8,6 +8,9 @@ import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import type { PanoramaItem, States } from '@/components/SphereViewer/type';
 import type { Viewer } from '@/components/SphereViewer/SphereViewer';
 
+import { chooseFilesUtils } from '@/utils';
+
+
 import './style.less';
 
 const testDataList = [
@@ -181,35 +184,21 @@ function SphereViewerBox() {
   /**
    * 上传体验图像
    */
-  const handleUploadImg = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e) => {
-      const file = (e.target as HTMLInputElement)?.files?.[0];
-      if (!file) return;
+  const handleUploadImg = async () => {
 
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
+    const urlFiles = await chooseFilesUtils<'url'>({returnType: 'url'});
 
-      reader.onload = () => {
-        const url = reader.result as string;
-        const id = `upload_${Date.now()}`;
-        const item: PanoramaItem = {
-          id,
-          url,
-          active: true,
-          cameraPos: []
-        };
+    if (!urlFiles.length) return;
 
-        states.panoramaList.push(item);
-        setStates({...states});
-
-        switchPanorama(item);
-      }
+    const newItem: PanoramaItem = {
+      id: `${Date.now()}`,
+      url: urlFiles[0].url,
+      cameraPos: []
     };
 
-    fileInput.click();
+    states.panoramaList.push(newItem);
+    setStates({...states});
+    switchPanorama(newItem);
   }
 
 

@@ -1,9 +1,9 @@
-type ChooseFilesAccept = 'image/*' | 'video/*' | 'audio/*' | 'application/*' | 'text/*' | 'all/*';
+type ChooseFilesReturnType = 'file' | 'url' | 'base64';
 
 type ChooseFilesOptions = {
-  accept: ChooseFilesAccept;
+  accept: string;
   multiple: boolean;
-  returnType: 'file' | 'url' | 'base64';
+  returnType: ChooseFilesReturnType
 };
 
 type UrlFile = {
@@ -22,6 +22,10 @@ const defaultChooseFilesOptions: ChooseFilesOptions = {
   returnType: 'file'
 };
 
+type ChooseFilesReturn = 
+  | File[] 
+  | UrlFile[] 
+  | Base64File[];
 /**
  * 选择文件
  * @param options 选择文件的配置
@@ -38,26 +42,35 @@ const defaultChooseFilesOptions: ChooseFilesOptions = {
  *   returnType: 'file'
  * });
  */
-export const chooseFilesUtils = <T>(options = defaultChooseFilesOptions): Promise<T> => {
-  return new Promise<T>((resolve) => {
+export function chooseFilesUtils(options: { accept?: string; multiple?: boolean; returnType: 'file' }): Promise<File[]>;
+export function chooseFilesUtils(options: { accept?: string; multiple?: boolean; returnType: 'url' }): Promise<UrlFile[]>;
+export function chooseFilesUtils(options: { accept?: string; multiple?: boolean; returnType: 'base64' }): Promise<Base64File[]>;
+export function chooseFilesUtils (
+  options: Partial<ChooseFilesOptions> = {}
+): Promise<ChooseFilesReturn> {
+  // 使用解构方式设置默认值
+  const { accept, multiple, returnType } = { ...defaultChooseFilesOptions, ...options };
+
+  return new Promise<ChooseFilesReturn>((resolve) => {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = options.accept;
-    fileInput.multiple = options.multiple;
+    fileInput.accept = accept;
+    fileInput.multiple = multiple;
 
     fileInput.onchange = (e) => {
-      const files = (e.target as HTMLInputElement)?.files;
+      const files = (e.target as HTMLInputElement)?.files ?? [];
+
       if (files?.length === 0) {
         resolve([]);
         return;
       };
 
-      if (options.returnType === 'file') {
-        resolve(files);
+      if (returnType === 'file') {
+        resolve(Array.from(files));
         return;
       }
 
-      if (options.returnType === 'url') {
+      if (returnType === 'url') {
         const urlFiles: UrlFile[] = [];
         Array.from(files).forEach((file) => {
           const url = URL.createObjectURL(file);
@@ -67,7 +80,7 @@ export const chooseFilesUtils = <T>(options = defaultChooseFilesOptions): Promis
         return;
       }
 
-      if (options.returnType === 'base64') {
+      if (returnType === 'base64') {
         const base64Files: Base64File[] = [];
         Array.from(files).forEach((file) => {
           const reader = new FileReader();
