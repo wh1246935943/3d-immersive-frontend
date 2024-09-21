@@ -24,13 +24,15 @@ jobs:
     - name: Build project
       run: yarn build
 
+    - name: Setup SSH agent
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
     - name: Add SSH known hosts
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+        ssh-keyscan -H 8.137.114.19 >> ~/.ssh/known_hosts
 
     - name: Deploy to Alibaba Cloud 3d-immersive
       run: |
         scp -r ./dist root@8.137.114.19:/www/wwwroot/www.resgoing.com/case/3d-immersive
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
