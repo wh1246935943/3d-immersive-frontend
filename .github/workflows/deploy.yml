@@ -24,6 +24,11 @@ jobs:
     - name: Build project
       run: yarn build
 
+    - name: Add SSH known hosts
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+
     - name: Deploy to Alibaba Cloud
       run: |
         scp -r ./dist root@8.137.114.19:/www/wwwroot/www.resgoing.com/case/3d-immersive
