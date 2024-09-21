@@ -186,7 +186,7 @@ function SphereViewerBox() {
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
     fileInput.onchange = (e) => {
-      const file = e.target?.files?.[0];
+      const file = (e.target as HTMLInputElement)?.files?.[0];
       if (!file) return;
 
       const reader = new FileReader();
