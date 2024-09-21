@@ -178,6 +178,40 @@ function SphereViewerBox() {
     setStates({...states});
     updateMarkers({renderMarkerDelay: 1000})
   }
+  /**
+   * 上传体验图像
+   */
+  const handleUploadImg = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e) => {
+      const file = e.target?.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const url = reader.result as string;
+        const id = `upload_${Date.now()}`;
+        const item: PanoramaItem = {
+          id,
+          url,
+          active: true,
+          cameraPos: []
+        };
+
+        states.panoramaList.push(item);
+        setStates({...states});
+
+        switchPanorama(item);
+      }
+    };
+
+    fileInput.click();
+  }
+
 
   return (
     <>
@@ -186,6 +220,7 @@ function SphereViewerBox() {
         <div className="">
           <button className="bg-blue-500 text-slate-50 mr-3 p-2" onClick={setAutorotate}>停止/开始旋转</button>
           <button className="bg-blue-500 text-slate-50 mr-3 p-2" onClick={handleEditCameraPos}>{states.mouseInteractionType === 'EDIT_CAMERA_POS' ? '完成编辑相机位置' : '编辑相机位置'}</button>
+          <button className="bg-blue-500 text-slate-50 mr-3 p-2" onClick={handleUploadImg}>上传一张全景图</button>
         </div>
         <div className="flex mr-3 mt-3">
           {
