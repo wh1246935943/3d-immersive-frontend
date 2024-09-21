@@ -186,8 +186,7 @@ function SphereViewerBox() {
    */
   const handleUploadImg = async () => {
 
-    const urlFiles = await chooseFilesUtils<'url'>({returnType: 'url'});
-
+    const urlFiles = await chooseFilesUtils({returnType: 'url'});
     if (!urlFiles.length) return;
 
     const newItem: PanoramaItem = {
@@ -200,7 +199,6 @@ function SphereViewerBox() {
     setStates({...states});
     switchPanorama(newItem);
   }
-
 
   return (
     <>
