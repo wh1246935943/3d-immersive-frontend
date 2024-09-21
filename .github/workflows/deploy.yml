@@ -26,6 +26,6 @@ jobs:
 
     - name: Deploy to Alibaba Cloud
       run: |
-        scp -r ./dist 8.137.114.19:/www/wwwroot/www.resgoing.com/case/3d-immersive
+        scp -r ./dist root@8.137.114.19:/www/wwwroot/www.resgoing.com/case/3d-immersive
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
